@@ -1,1 +1,21 @@
-1:10 / 2:41 - Tell the Reaper I'm Sorry by Lil Revive
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Camashima's Site</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+        <script type="text/javascript">
+           $(document).ready(function () {
+  // execute this code once, and only once, when the document is ready
+  setInterval(function () {
+    $('#track').load('./output/song.txt');
+  }, 1000);  // perform this interval operation every 1000 ms
+});
+        </script>
+    </head>
+    <body>
+        Currently Playing:
+        <div id="track">
+            Place-holder
+        </div>
+    </body>
+</html>

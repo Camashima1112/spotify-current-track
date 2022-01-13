@@ -9,10 +9,10 @@ const path = require('path')
 
 const buff = Buffer.from(process.env.SPOTIFY_CLIENT_ID+':'+process.env.SPOTIFY_CLIENT_SECRET);
 const base64data = buff.toString('base64');
+var http = require('http');
 
-app.listen(8888, () => {
-    console.log("App listening on http://localhost:8888")
-});
+app.listen(8888);
+console.log('Listening on 8888') 
 
 /* ++++++++++++++++++++++++++ */
 /* +++ USER AUTHORIZATION +++ */
@@ -21,7 +21,7 @@ app.listen(8888, () => {
 app.get('/login', function(req, res) {
 
     const scopes = 'user-read-currently-playing';
-    const redirect_uri = 'https://8888-pink-jackal-yb8lvyy7.ws-us25.gitpod.io/callback';
+    const redirect_uri = 'https://camashimas-current-track.run-eu-central1.goorm.io/callback';
 
     res.redirect('https://accounts.spotify.com/authorize' +
       '?response_type=code' +
@@ -30,11 +30,14 @@ app.get('/login', function(req, res) {
       '&redirect_uri=' + encodeURIComponent(redirect_uri));
 
 });
+app.use(express.static(path.join(__dirname, 'public')))
+app.get(express.static(path.join(__dirname, 'output')))
+app.use(express.static(path.join(__dirname,)))
 
 app.get('/callback', function(req, res) {
 
     const auth_code = req.query.code;
-    const redirect_uri = 'https://8888-pink-jackal-yb8lvyy7.ws-us25.gitpod.io/callback';
+    const redirect_uri = 'https://camashimas-current-track.run-eu-central1.goorm.io/callback';
     const options = {
         url : 'https://accounts.spotify.com/api/token',
         method : 'post',
@@ -65,8 +68,10 @@ app.get('/callback', function(req, res) {
 /* +++ MAIN LOOP +++ */
 /* +++++++++++++++++ */
 
+
 let isRequesting = false;
 let requestsMade = 0;
+
 async function main () {
 
     if (isRequesting) { return }
@@ -126,7 +131,10 @@ async function main () {
             const progress_time = millisToMinutesAndSeconds(progress_ms);
             const duration_time = millisToMinutesAndSeconds(duration_ms);
             const text          = `${progress_time} / ${duration_time} - ${song} by ${artist}`;
+            // fs.appendFile(filename,data,[options],callback);
             fs.writeFileSync('./output/song.txt', text);
+           
+            
             console.clear();
             console.log('Currently playing:');
             console.log(text);
@@ -137,6 +145,7 @@ async function main () {
             console.clear();
             console.log('Looks like you are not playing anyting at the moment.');
             isRequesting = false;
+      
         }
 
 
