@@ -2,8 +2,10 @@ require('dotenv').config();
 
 const axios = require('axios');
 const express = require('express');
+const res = require('express/lib/response');
 const fs = require('fs');
 const app = express();
+const path = require('path')
 
 const buff = Buffer.from(process.env.SPOTIFY_CLIENT_ID+':'+process.env.SPOTIFY_CLIENT_SECRET);
 const base64data = buff.toString('base64');
@@ -19,7 +21,7 @@ app.listen(8888, () => {
 app.get('/login', function(req, res) {
 
     const scopes = 'user-read-currently-playing';
-    const redirect_uri = 'http://localhost:8888/callback';
+    const redirect_uri = 'https://8888-pink-jackal-yb8lvyy7.ws-us25.gitpod.io/callback';
 
     res.redirect('https://accounts.spotify.com/authorize' +
       '?response_type=code' +
@@ -32,7 +34,7 @@ app.get('/login', function(req, res) {
 app.get('/callback', function(req, res) {
 
     const auth_code = req.query.code;
-    const redirect_uri = 'http://localhost:8888/callback';
+    const redirect_uri = 'https://8888-pink-jackal-yb8lvyy7.ws-us25.gitpod.io/callback';
     const options = {
         url : 'https://accounts.spotify.com/api/token',
         method : 'post',
@@ -175,3 +177,5 @@ function setupRefreshTokenTxt(next) {
         return next();
     });
 }
+
+
