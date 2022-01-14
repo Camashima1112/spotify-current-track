@@ -7,48 +7,48 @@ const fs = require('fs');
 const app = express();
 const path = require('path')
 
-const buff = Buffer.from(process.env.SPOTIFY_CLIENT_ID+':'+process.env.SPOTIFY_CLIENT_SECRET);
+const buff = Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET);
 const base64data = buff.toString('base64');
 var http = require('http');
 
 app.listen(8888);
-console.log('Listening on 8888') 
+console.log('Listening on 8888')
 
 /* ++++++++++++++++++++++++++ */
 /* +++ USER AUTHORIZATION +++ */
 /* ++++++++++++++++++++++++++ */
 
-app.get('/login', function(req, res) {
+app.get('/login', function (req, res) {
 
     const scopes = 'user-read-currently-playing';
-    const redirect_uri = 'https://camashimas-current-track.run-eu-central1.goorm.io/callback';
+    const redirect_uri = 'https://8888-amashima1112-spotifycurr-0tozk3w6bge.ws-us27.gitpod.io/callback';
 
     res.redirect('https://accounts.spotify.com/authorize' +
-      '?response_type=code' +
-      '&client_id=' + process.env.SPOTIFY_CLIENT_ID +
-      '&scope=' + encodeURIComponent(scopes) +
-      '&redirect_uri=' + encodeURIComponent(redirect_uri));
+        '?response_type=code' +
+        '&client_id=' + process.env.SPOTIFY_CLIENT_ID +
+        '&scope=' + encodeURIComponent(scopes) +
+        '&redirect_uri=' + encodeURIComponent(redirect_uri));
 
 });
 app.use(express.static(path.join(__dirname, 'public')))
 app.get(express.static(path.join(__dirname, 'output')))
 app.use(express.static(path.join(__dirname,)))
 
-app.get('/callback', function(req, res) {
+app.get('/callback', function (req, res) {
 
     const auth_code = req.query.code;
-    const redirect_uri = 'https://camashimas-current-track.run-eu-central1.goorm.io/callback';
+    const redirect_uri = 'https://8888-amashima1112-spotifycurr-0tozk3w6bge.ws-us27.gitpod.io/callback';
     const options = {
-        url : 'https://accounts.spotify.com/api/token',
-        method : 'post',
-        headers : {
-            authorization : `Basic ${base64data}`,
-            contentType : 'application/x-www-form-urlencoded'
+        url: 'https://accounts.spotify.com/api/token',
+        method: 'post',
+        headers: {
+            authorization: `Basic ${base64data}`,
+            contentType: 'application/x-www-form-urlencoded'
         },
-        params : {
-            grant_type : 'authorization_code',
-            code : auth_code,
-            redirect_uri : redirect_uri
+        params: {
+            grant_type: 'authorization_code',
+            code: auth_code,
+            redirect_uri: redirect_uri
         }
     }
 
@@ -72,7 +72,7 @@ app.get('/callback', function(req, res) {
 let isRequesting = false;
 let requestsMade = 0;
 
-async function main () {
+async function main() {
 
     if (isRequesting) { return }
     isRequesting = true;
@@ -83,58 +83,58 @@ async function main () {
 
         // GET NEW ACCESS_TOKEN
         const options1 = {
-            url : 'https://accounts.spotify.com/api/token',
-            method : 'post',
-            headers : {
-                authorization : `Basic ${base64data}`,
-                contentType : 'application/x-www-form-urlencoded'
+            url: 'https://accounts.spotify.com/api/token',
+            method: 'post',
+            headers: {
+                authorization: `Basic ${base64data}`,
+                contentType: 'application/x-www-form-urlencoded'
             },
-            params : {
-                grant_type : 'refresh_token',
-                refresh_token : refresh_token
+            params: {
+                grant_type: 'refresh_token',
+                refresh_token: refresh_token
             }
         }
 
         let access_token = "";
         try {
-          const auth         = await axios(options1);
-                access_token = auth.data.access_token;
+            const auth = await axios(options1);
+            access_token = auth.data.access_token;
         } catch (e) {
-          console.error("refresh_token request error");
-          console.error(e.message);
+            console.error("refresh_token request error");
+            console.error(e.message);
         }
 
         // REQUEST CURRENTLY PLAYING SONG DATA
         const options2 = {
-            url : 'https://api.spotify.com/v1/me/player/currently-playing',
-            method : 'get',
-            headers : {
-                authorization : `Bearer ${access_token}`
+            url: 'https://api.spotify.com/v1/me/player/currently-playing',
+            method: 'get',
+            headers: {
+                authorization: `Bearer ${access_token}`
             }
         }
 
         let trackInformation = {};
         try {
-          trackInformation = await axios(options2);
+            trackInformation = await axios(options2);
         } catch (e) {
-          console.error("currently-playing request error");
-          console.error(e.message);
+            console.error("currently-playing request error");
+            console.error(e.message);
         }
 
         if (trackInformation.data) {
             // WRITE TRACK INFORMATIONS TO FILE
-            const artist        = trackInformation.data.item.artists[0].name;
-            const song          = trackInformation.data.item.name;
-            const album         = trackInformation.data.item.album.name;
-            const progress_ms   = trackInformation.data.progress_ms;
-            const duration_ms   = trackInformation.data.item.duration_ms;
+            const artist = trackInformation.data.item.artists[0].name;
+            const song = trackInformation.data.item.name;
+            const album = trackInformation.data.item.album.name;
+            const progress_ms = trackInformation.data.progress_ms;
+            const duration_ms = trackInformation.data.item.duration_ms;
             const progress_time = millisToMinutesAndSeconds(progress_ms);
             const duration_time = millisToMinutesAndSeconds(duration_ms);
-            const text          = `${progress_time} / ${duration_time} - ${song} by ${artist}`;
+            const text = `${progress_time} / ${duration_time} - ${song} by ${artist}`;
             // fs.appendFile(filename,data,[options],callback);
             fs.writeFileSync('./output/song.txt', text);
-           
-            
+
+
             console.clear();
             console.log('Currently playing:');
             console.log(text);
@@ -145,7 +145,7 @@ async function main () {
             console.clear();
             console.log('Looks like you are not playing anyting at the moment.');
             isRequesting = false;
-      
+
         }
 
 
